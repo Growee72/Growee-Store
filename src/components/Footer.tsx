@@ -1,5 +1,6 @@
 import React from 'react';
-import { Gamepad2, ShieldCheck, Heart } from 'lucide-react';
+import { ShieldCheck, Heart } from 'lucide-react';
+import groweeLogo from '../assets/images/growee_logo_1780212815449.png';
 
 export const Footer: React.FC = () => {
   return (
@@ -9,7 +10,12 @@ export const Footer: React.FC = () => {
         {/* UPPER ROW */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-900 pb-6">
           <div className="flex items-center gap-2">
-            <Gamepad2 className="w-5 h-5 text-indigo-400" />
+            <img 
+              src={groweeLogo} 
+              alt="Growee Store Logo" 
+              className="w-5 h-5 rounded-md object-cover opacity-80"
+              referrerPolicy="no-referrer"
+            />
             <span className="font-extrabold text-white">Growee Store Inc.</span>
             <span className="text-slate-600">|</span>
             <span>Platform SaaS Top-up Otomatis Terpercaya</span>

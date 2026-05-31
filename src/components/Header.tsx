@@ -1,6 +1,7 @@
 import React from 'react';
-import { Gamepad2, Sparkles, Flame, LogOut, Shield, User } from 'lucide-react';
+import { Sparkles, Flame, LogOut, Shield, User } from 'lucide-react';
 import { SubscriptionState, UserAccount } from '../types';
+import groweeLogo from '../assets/images/growee_logo_1780212815449.png';
 
 interface HeaderProps {
   currentTab: 'buyer' | 'saas' | 'seller' | 'growth' | 'admin' | 'developer';
@@ -30,11 +31,12 @@ export const Header: React.FC<HeaderProps> = ({
         
         {/* LOGO & TITLE */}
         <div className="flex items-center gap-2.5 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-indigo-600 to-violet-500 p-[1.5px] shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-            <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center">
-              <Gamepad2 className="w-5 h-5 text-emerald-400 animate-pulse" />
-            </div>
-          </div>
+          <img 
+            src={groweeLogo} 
+            alt="Growee Store Logo" 
+            className="w-10 h-10 rounded-xl object-cover border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] animate-pulse" 
+            referrerPolicy="no-referrer"
+          />
           <div className="text-left font-sans">
             <div className="flex items-center gap-1.5">
               <h1 className="text-md font-extrabold tracking-tight text-white m-0 leading-tight">
