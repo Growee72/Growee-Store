@@ -21,9 +21,47 @@ function App() {
   const [currentTab, setCurrentTab] = useState<'buyer' | 'saas' | 'seller' | 'growth' | 'admin' | 'developer'>('buyer');
   
   // Dynamic products catalog state with Active preset status
-  const [products, setProducts] = useState<GameProduct[]>(() => 
-    INITIAL_PRODUCTS.map(p => ({ ...p, status: 'Active', addedBy: 'System Preset' }))
-  );
+  const [products, setProducts] = useState<GameProduct[]>(() => {
+    const base = INITIAL_PRODUCTS.map(p => ({ ...p, status: 'Active', addedBy: 'System Preset', isPro: false }));
+    
+    // Syifa PRO live products
+    const syifaProduct: GameProduct = {
+      id: 'syifa-special-rod',
+      category: 'Fisch',
+      name: 'Kraken Slayer Rod [Ancient]',
+      description: 'Dibuat secara kustom oleh Ratu Samudra Admin Syifa. Kecepatan menarik joran dan kekuatan tali meningkat 4x lipat dengan bonus memikat ikan purba megalodon.',
+      price: 125000,
+      originalPrice: 185000,
+      stock: 5,
+      deliveryType: 'Secure Trading Server',
+      imagePlaceholder: 'purple-gold-gradient',
+      badge: 'Ancient Custom',
+      vipPriceDiscount: 12,
+      status: 'Active',
+      addedBy: 'Admin Syifa (Penyedia Item)',
+      isPro: true,
+    };
+
+    // Rian Regular live products
+    const rianProduct: GameProduct = {
+      id: 'rian-normal-fisch',
+      category: 'Fisch',
+      name: 'Umpan Cacing Rian (Regular Pack)',
+      description: 'Lumpur basah pilihan isi 100x cacing tanah biasa untuk memancing ikan level rendah di laut dangkal.',
+      price: 9500,
+      originalPrice: 15000,
+      stock: 450,
+      deliveryType: 'Automatic Bot',
+      imagePlaceholder: 'emerald-gradient',
+      badge: 'Murah Meriah',
+      vipPriceDiscount: 2,
+      status: 'Active',
+      addedBy: 'Admin Rian (Penyedia Item)',
+      isPro: false,
+    };
+
+    return [syifaProduct, ...base, rianProduct];
+  });
   const [isStoreClosed, setIsStoreClosed] = useState(false);
   
   // Track active global subscription state
@@ -47,7 +85,8 @@ function App() {
       role: 'developer',
       status: 'Active',
       createdAt: '2026-01-10',
-      lastLogin: '2026-05-31 06:12'
+      lastLogin: '2026-05-31 06:12',
+      isPro: true
     },
     {
       id: 'user-admin-rian',
@@ -56,7 +95,8 @@ function App() {
       role: 'admin',
       status: 'Active',
       createdAt: '2026-02-15',
-      lastLogin: '2026-05-31 06:22'
+      lastLogin: '2026-05-31 06:22',
+      isPro: false
     },
     {
       id: 'user-admin-syifa',
@@ -65,7 +105,8 @@ function App() {
       role: 'admin',
       status: 'Active',
       createdAt: '2026-02-18',
-      lastLogin: '2026-05-30 18:40'
+      lastLogin: '2026-05-30 18:40',
+      isPro: true
     },
     {
       id: 'user-buyer-roblox',
@@ -74,7 +115,8 @@ function App() {
       role: 'buyer',
       status: 'Active',
       createdAt: '2026-03-01',
-      lastLogin: '2026-05-31 06:30'
+      lastLogin: '2026-05-31 06:30',
+      isPro: false
     }
   ]);
 
@@ -210,6 +252,41 @@ function App() {
       nextStatus === 'Banned' ? 'Sanksi Ban' : 'Pencabutan Ban',
       `Mengubah status perizinan login account ${u.username} (${u.email}) menjadi ${nextStatus}.`,
       nextStatus === 'Banned' ? 'danger' : 'success'
+    );
+  };
+
+  const handleToggleAdminProSubscription = (userId: string) => {
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) return;
+    const nextProState = !targetUser.isPro;
+
+    setUsers(prev => prev.map(u => {
+      if (u.id === userId) {
+        return { ...u, isPro: nextProState };
+      }
+      return u;
+    }));
+
+    if (currentUser?.id === userId) {
+      setCurrentUser(prev => prev ? { ...prev, isPro: nextProState } : null);
+    }
+
+    // Update isPro flag on existing products added by this admin
+    setProducts(prev => prev.map(p => {
+      if (p.addedBy === targetUser.username) {
+        return { ...p, isPro: nextProState };
+      }
+      return p;
+    }));
+
+    addActivityLog(
+      targetUser.email,
+      targetUser.role,
+      'SaaS PRO Subscription',
+      nextProState 
+        ? `Merchant "${targetUser.username}" mengaktifkan Paket Langganan Seller PRO (Rp 49.000/bulan). Seluruh produk miliknya otomatis dipajang di urutan teratas marketplace!`
+        : `Merchant "${targetUser.username}" membatalkan langganan Seller PRO. Fitur Prioritas Katalog & Bebas Biaya Admin dinonaktifkan.`,
+      nextProState ? 'success' : 'warning'
     );
   };
 
@@ -456,6 +533,7 @@ function App() {
                 onAddProduct={handleAddProduct}
                 onUpdateStockAndPrice={handleUpdateStockAndPrice}
                 currentUser={currentUser}
+                onToggleProSubscription={handleToggleAdminProSubscription}
               />
             )}
 

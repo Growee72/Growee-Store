@@ -12,6 +12,7 @@ interface AdminConsoleProps {
   onAddProduct: (product: GameProduct) => void;
   onUpdateStockAndPrice: (productId: string, addStock: number, newPrice?: number) => void;
   currentUser: UserAccount | null;
+  onToggleProSubscription?: (userId: string) => void;
 }
 
 export const AdminConsole: React.FC<AdminConsoleProps> = ({
@@ -21,6 +22,7 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
   onAddProduct,
   onUpdateStockAndPrice,
   currentUser,
+  onToggleProSubscription,
 }) => {
   // Add product form states
   const [newProductName, setNewProductName] = useState('');
@@ -74,6 +76,7 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
       vipPriceDiscount: Number(newProductVipDiscount),
       status: 'Pending', // Force default pending approval status as requested
       addedBy: currentUser ? currentUser.username : 'Admin Rian', // Attach the applicant's name
+      isPro: currentUser?.isPro || false, // Match with SaaS premium plan
     };
 
     onAddProduct(createdProduct);
@@ -82,7 +85,7 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
     // Reset Form
     setNewProductName('');
     setNewProductDesc('');
-    setNewProductPrice(29000);
+    setNewProductPrice(29050);
     setNewProductStock(50);
   };
 
@@ -104,6 +107,11 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
   };
 
   const handleQuickPreset = (presetType: 'secret-fish' | 'skin-rod' | 'top-up') => {
+    if (!currentUser?.isPro) {
+      alert('⚠️ Fitur Premium Terkunci! Anda harus berlangganan Seller PRO terlebih dahulu untuk membuka dan menggunakan preset item mewah secara instan.');
+      return;
+    }
+
     if (presetType === 'secret-fish') {
       setNewProductName('Ikan Secret: Celestial Leviathan');
       setNewProductCategory('Fisch');
@@ -197,6 +205,107 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
               </>
             )}
           </button>
+        </div>
+      </div>
+
+      {/* SAAS PREMIUM MERCHANT STATUS PANEL */}
+      <div className="bg-gradient-to-r from-slate-900/80 via-indigo-950/20 to-slate-900/80 p-6 rounded-3xl border border-indigo-500/20 space-y-4 text-left">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1 text-left">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">👑</span>
+              <h3 className="text-md font-extrabold text-white tracking-tight flex items-center gap-2 font-sans">
+                Growee SaaS Merchant PRO Plan
+                {currentUser?.isPro ? (
+                  <span className="text-[10px] bg-amber-400/25 text-yellow-300 border border-amber-400/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest animate-pulse">Sellers PRO Aktif</span>
+                ) : (
+                  <span className="text-[10px] bg-slate-800 text-slate-450 border border-slate-700 px-2 py-0.5 rounded-full font-semibold uppercase tracking-widest">Sellers Regular</span>
+                )}
+              </h3>
+            </div>
+            <p className="text-slate-450 text-[11px] leading-relaxed max-w-3xl">
+              Tingkatkan konversi penjualan Anda hingga 300% dengan mengaktifkan paket optimasi Seller Pro. Dapatkan keuntungan eksklusif katalog paling atas, prioritas bot transaksi cepat, dan pembebasan biaya transfer (0% transfer admin).
+            </p>
+          </div>
+
+          <button
+            onClick={() => onToggleProSubscription && onToggleProSubscription(currentUser?.id || '')}
+            className={`p-3 px-5 rounded-2xl text-xs font-bold transition-all duration-300 shadow flex items-center gap-2 shrink-0 cursor-pointer ${
+              currentUser?.isPro 
+                ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/10' 
+                : 'bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 hover:brightness-110 shadow-amber-500/15 font-extrabold'
+            }`}
+          >
+            {currentUser?.isPro ? (
+              <>
+                <span>⛔ Batalkan Langganan PRO</span>
+              </>
+            ) : (
+              <>
+                <span>🌟 Upgrade ke PRO (Rp 49.000/Bln)</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Feature Comparison Grid & Visual Status Warnings */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1 text-left">
+          {/* Benefit 1 */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            currentUser?.isPro 
+              ? 'bg-indigo-950/20 border-indigo-500/30' 
+              : 'bg-slate-950/40 border-slate-800/80'
+          }`}>
+            <div className="text-xs font-bold text-white flex items-center gap-1.5 mb-1 font-sans">
+              <span>🌟 Prioritas Katalog :</span>
+              {currentUser?.isPro ? (
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 rounded uppercase tracking-wider font-bold">AKTIF (TERATAS)</span>
+              ) : (
+                <span className="text-[10px] bg-rose-500/10 text-rose-350 border border-rose-500/15 px-1.5 rounded uppercase tracking-wider font-semibold font-mono">NORMAL</span>
+              )}
+            </div>
+            <p className="text-[11px] leading-relaxed text-slate-400">
+              Produk Anda otomatis dipajang di <strong>baris baris paling atas</strong> katalog pembeli. Tidak tenggelam di tumpukan bawah!
+            </p>
+          </div>
+
+          {/* Benefit 2 */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            currentUser?.isPro 
+              ? 'bg-indigo-950/20 border-indigo-500/30' 
+              : 'bg-slate-950/40 border-slate-800/80'
+          }`}>
+            <div className="text-xs font-bold text-white flex items-center gap-1.5 mb-1 font-sans">
+              <span>⚡ Antrean Bot :</span>
+              {currentUser?.isPro ? (
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 rounded uppercase tracking-wider font-bold">PRIORITAS IP VIP</span>
+              ) : (
+                <span className="text-[10px] bg-rose-500/10 text-rose-350 border border-rose-500/15 px-1.5 rounded uppercase tracking-wider font-semibold font-mono">ANTREAN BIASA</span>
+              )}
+            </div>
+            <p className="text-[11px] leading-relaxed text-slate-400">
+              Pengiriman oleh robot pancing in-game diprioritaskan di baris antrean terdepan <strong>kurang dari 30 detik</strong>!
+            </p>
+          </div>
+
+          {/* Benefit 3 */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            currentUser?.isPro 
+              ? 'bg-indigo-950/20 border-indigo-500/30' 
+              : 'bg-slate-950/40 border-slate-800/80'
+          }`}>
+            <div className="text-xs font-bold text-white flex items-center gap-1.5 mb-1 font-sans">
+              <span>💸 Biaya Admin Payout :</span>
+              {currentUser?.isPro ? (
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 rounded uppercase tracking-wider font-bold">Bebas Biaya (0%)</span>
+              ) : (
+                <span className="text-[10px] bg-rose-500/10 text-rose-350 border border-rose-500/15 px-1.5 rounded uppercase tracking-wider font-semibold font-mono">Potong 5% (Normal)</span>
+              )}
+            </div>
+            <p className="text-[11px] leading-relaxed text-slate-400">
+              Menarik keuntungan penjualan / payout ke Rekening Anda tanpa biaya denda administrasi sepeser pun.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -346,17 +455,39 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
           <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl space-y-4">
             <div className="border-b border-slate-800/80 pb-3">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-sky-400" />
+                <Sparkles className="w-4 h-4 text-amber-400" />
                 Quick Presets: Fisch & Robux Luxury Items
+                {!currentUser?.isPro && (
+                  <span className="text-[9px] bg-amber-400/10 text-amber-300 border border-amber-500/20 px-1.5 py-0.5 rounded font-bold uppercase">PRO</span>
+                )}
               </h3>
               <p className="text-slate-500 text-xs">Klik salah satu tombol asisten untuk merancang template pengajuan barang bernilai tinggi secara otomatis ke input form kanan.</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 relative overflow-hidden rounded-2xl">
+              {/* Overlaid padlock / blur shield if not PRO */}
+              {!currentUser?.isPro && (
+                <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[2px] rounded-2xl z-10 flex flex-col items-center justify-center p-3 text-center border border-indigo-500/15">
+                  <span className="text-lg">🔒</span>
+                  <p className="text-[11px] font-bold text-white mt-1">Preset Premium Terkunci</p>
+                  <p className="text-[9px] text-slate-400 max-w-[200px] mt-0.5 leading-tight">
+                    Aktifkan paket <strong>Sellers PRO</strong> terlebih dahulu untuk memuat template item mewah legendaris instan!
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => onToggleProSubscription && onToggleProSubscription(currentUser?.id || '')}
+                    className="mt-2.5 px-3 py-1 bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-extrabold text-[9px] uppercase rounded-lg hover:brightness-110 shadow-md shadow-amber-550/25 transition cursor-pointer"
+                  >
+                    Upgrade Now
+                  </button>
+                </div>
+              )}
+
               <button
                 type="button"
+                disabled={!currentUser?.isPro}
                 onClick={() => handleQuickPreset('secret-fish')}
-                className="p-3.5 bg-slate-950 hover:bg-slate-900/80 rounded-2xl border border-indigo-500/20 text-left space-y-1.5 transition-all text-xs"
+                className={`p-3.5 bg-slate-950 hover:bg-slate-900/80 rounded-2xl border border-indigo-500/20 text-left space-y-1.5 transition-all text-xs ${!currentUser?.isPro ? 'opacity-30' : ''}`}
               >
                 <div className="text-xs font-bold text-white flex items-center justify-between">
                   <span>🐋 Ikan Secret Mitis</span>
@@ -367,8 +498,9 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
 
               <button
                 type="button"
+                disabled={!currentUser?.isPro}
                 onClick={() => handleQuickPreset('skin-rod')}
-                className="p-3.5 bg-slate-950 hover:bg-slate-900/80 rounded-2xl border border-indigo-500/20 text-left space-y-1.5 transition-all text-xs"
+                className={`p-3.5 bg-slate-950 hover:bg-slate-900/80 rounded-2xl border border-indigo-500/20 text-left space-y-1.5 transition-all text-xs ${!currentUser?.isPro ? 'opacity-30' : ''}`}
               >
                 <div className="text-xs font-bold text-white flex items-center justify-between">
                   <span>🪄 Skin Rod Legend</span>
@@ -379,8 +511,9 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
 
               <button
                 type="button"
+                disabled={!currentUser?.isPro}
                 onClick={() => handleQuickPreset('top-up')}
-                className="p-3.5 bg-slate-950 hover:bg-slate-900/80 rounded-2xl border border-indigo-500/20 text-left space-y-1.5 transition-all text-xs"
+                className={`p-3.5 bg-slate-950 hover:bg-slate-900/80 rounded-2xl border border-indigo-500/20 text-left space-y-1.5 transition-all text-xs ${!currentUser?.isPro ? 'opacity-30' : ''}`}
               >
                 <div className="text-xs font-bold text-white flex items-center justify-between">
                   <span>🪙 Coins & Baits pack</span>
@@ -397,12 +530,24 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
           <div className="bg-slate-900/60 rounded-3xl p-6 border border-slate-800 backdrop-blur-md space-y-5 text-left font-sans">
             
             <div className="border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 font-sans">
                 <Plus className="w-4 h-4 text-sky-400" />
                 Form Suplai Item Baru (Kirim Pengajuan)
               </h3>
-              <p className="text-slate-500 text-[11px] mt-0.5">Isi detail di bawah untuk mengajukan item game baru ke sistem. Status default pendirian awal akan bernilai 'Pending'.</p>
+              <p className="text-slate-500 text-[11px] mt-0.5">Isi detail di bawah untuk mengajukan item game baru ke sistem. Status default pendirian awal akan bernilai \'Pending\'.</p>
             </div>
+
+            {currentUser?.isPro ? (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-[10px] text-emerald-400 leading-relaxed font-sans flex items-center gap-2">
+                <span>🌟</span>
+                <span><strong>Sellers PRO Aktif:</strong> Produk otomatis terindeks Prioritas & dipajang di urutan top!</span>
+              </div>
+            ) : (
+              <div className="p-3 bg-rose-500/5 border border-rose-500/20 rounded-xl text-[10px] text-rose-300 leading-relaxed font-sans flex items-center gap-2">
+                <span>⚠️</span>
+                <span><strong>Sellers Regular:</strong> Produk ditaruh di antrean normal bawah. Upgrade ke PRO untuk catalog utama!</span>
+              </div>
+            )}
 
             <form onSubmit={handleCreateProduct} className="space-y-4">
               <div className="space-y-1">

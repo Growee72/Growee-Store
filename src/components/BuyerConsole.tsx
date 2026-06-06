@@ -49,13 +49,22 @@ export const BuyerConsole: React.FC<BuyerConsoleProps> = ({
 
   const isPremium = subscription.tier === 'premium';
 
-  // Filter products based on search and category
-  const filteredProducts = activeProductsOnly.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Filter and sort products based on search, category, and seller's PRO plan
+  const filteredProducts = activeProductsOnly
+    .filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      const aPro = a.isPro ? 1 : 0;
+      const bPro = b.isPro ? 1 : 0;
+      if (bPro !== aPro) {
+        return bPro - aPro; // PRO first
+      }
+      return 0;
+    });
 
   const getPrice = (product: GameProduct) => {
     if (isPremium) {
@@ -285,12 +294,16 @@ export const BuyerConsole: React.FC<BuyerConsoleProps> = ({
                     : 'border-slate-800 bg-slate-900/40 hover:bg-slate-900/70 hover:border-slate-700'
                 } ${currentCheckoutOrder ? 'pointer-events-none opacity-50' : ''}`}
               >
-                {/* Badge (Paling Populer, Terlaris, dst) */}
-                {product.badge && (
+                {/* Badge (PRO Prioritas vs Standar) */}
+                {product.isPro ? (
+                  <div className="absolute top-3 right-3 bg-amber-400/25 text-amber-300 border border-amber-500/30 text-[10px] px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 uppercase tracking-wider shadow-[0_0_10px_rgba(251,191,36,0.12)] animate-pulse">
+                    <span>🌟 PROMOTED</span>
+                  </div>
+                ) : product.badge ? (
                   <div className="absolute top-3 right-3 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0.5 rounded-full font-semibold">
                     {product.badge}
                   </div>
-                )}
+                ) : null}
 
                 {/* Content */}
                 <div className="space-y-3">

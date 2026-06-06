@@ -15,6 +15,7 @@ export interface GameProduct {
   status?: 'Pending' | 'Active' | 'Rejected'; // Approval system status
   addedBy?: string; // e.g. "Admin Rian" or "System Preset"
   rejectionReason?: string; // Reason for rejection
+  isPro?: boolean; // If prioritised / created by a Seller PRO
 }
 
 export interface UserAccount {
@@ -25,6 +26,7 @@ export interface UserAccount {
   status: 'Active' | 'Banned';
   createdAt: string;
   lastLogin: string;
+  isPro?: boolean; // For Admin / Seller PRO subscripton status (Rp 49.000/month)
 }
 
 export interface ActivityLog {
